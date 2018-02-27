@@ -15,6 +15,7 @@ void tcp_server::start_accept()
 void tcp_server::accept_handler(boost::shared_ptr<tcp_connection> connection_ptr, const boost::system::error_code &err)
 {
   if(!err) {
+    connection_list.push_back(connection_ptr);
     connection_ptr->start();
     start_accept();
   } else {
@@ -26,4 +27,9 @@ tcp_server::tcp_server(boost::asio::io_service &io_service) :
   acceptor_(io_service, boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), 8080))
 {
   start_accept();
+}
+
+std::list<boost::shared_ptr<tcp_connection> > &tcp_server::get_connection_list()
+{
+  return connection_list;
 }
