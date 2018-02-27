@@ -51,6 +51,8 @@ void tcp_connection::read_header_handler(const boost::system::error_code &err)
   if(!err) {
     unsigned int payload_length = boost::endian::big_to_native(*(unsigned int*)(read_header_buffer.data()));
     std::cout << "Payload length: " << payload_length << std::endl;
+    // TODO: if payload_length = 0 -> heartbear package
+    // switch
     read_payload(payload_length);
   } else {
     if (err != boost::asio::error::eof) {
