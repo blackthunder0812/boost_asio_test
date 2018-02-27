@@ -1,11 +1,20 @@
 #include <iostream>
 #include "tcp_connection.hpp"
 #include <boost/endian/conversion.hpp>
+#include "tcp_server.hpp"
 
-tcp_connection::tcp_connection(boost::asio::io_service &io_service) :
-  socket_(io_service)
+tcp_connection::tcp_connection(boost::asio::io_service &io_service, tcp_server *tcp_server_ptr) :
+  socket_(io_service),
+  tcp_server_ptr(tcp_server_ptr)
 {
 
+}
+
+tcp_connection::~tcp_connection()
+{
+  // TODO: lock, remove original shared_ptr to this
+  tcp_server_ptr->get_connection_list().remove(this);
+  // TODO: unlock
 }
 
 void tcp_connection::write(boost::shared_ptr<std::string> message)
@@ -86,9 +95,9 @@ void tcp_connection::process_message(boost::shared_ptr<char> payload_ptr, size_t
   std::cout << std::endl;
 }
 
-boost::shared_ptr<tcp_connection> tcp_connection::create_connection(boost::asio::io_service &io_service)
+boost::shared_ptr<tcp_connection> tcp_connection::create_connection(boost::asio::io_service &io_service, tcp_server *tcp_server_ptr)
 {
-  return boost::shared_ptr<tcp_connection>(new tcp_connection(io_service));
+  return boost::shared_ptr<tcp_connection>(new tcp_connection(io_service, tcp_server_ptr));
 }
 
 boost::asio::ip::tcp::socket &tcp_connection::socket()

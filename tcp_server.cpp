@@ -4,7 +4,7 @@
 
 void tcp_server::start_accept()
 {
-  boost::shared_ptr<tcp_connection> new_connection_ptr = tcp_connection::create_connection(acceptor_.get_io_service());
+  boost::shared_ptr<tcp_connection> new_connection_ptr = tcp_connection::create_connection(acceptor_.get_io_service(), this);
   acceptor_.async_accept(new_connection_ptr->socket(),
                          boost::bind(&tcp_server::accept_handler,
                                      this,
@@ -15,7 +15,9 @@ void tcp_server::start_accept()
 void tcp_server::accept_handler(boost::shared_ptr<tcp_connection> connection_ptr, const boost::system::error_code &err)
 {
   if(!err) {
-    connection_list.push_back(connection_ptr);
+    // TODO: lock
+    connection_list.push_back(connection_ptr.get());
+    // TODO: unlock
     connection_ptr->start();
     start_accept();
   } else {
@@ -29,7 +31,7 @@ tcp_server::tcp_server(boost::asio::io_service &io_service) :
   start_accept();
 }
 
-std::list<boost::shared_ptr<tcp_connection> > &tcp_server::get_connection_list()
+std::list<tcp_connection *> &tcp_server::get_connection_list()
 {
   return connection_list;
 }
