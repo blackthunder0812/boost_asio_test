@@ -10,7 +10,6 @@ tcp_connection::tcp_connection(boost::asio::io_service &io_service) :
 
 void tcp_connection::write(boost::shared_ptr<std::string> message)
 {
-
   boost::asio::async_write(socket_,
                            boost::asio::buffer(message->data(), message->length()),
                            boost::bind(&tcp_connection::write_handler,
