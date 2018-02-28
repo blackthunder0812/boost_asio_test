@@ -38,6 +38,7 @@ std::unordered_set<tcp_connection *> &tcp_server::get_connection_list()
 void tcp_server::broadcast_message(const std::string& message)
 {
   boost::shared_ptr<std::string> m(new std::string(message));
+  std::cout << "Sending message " << *(m.get()) << " to " << connection_list.size() << " clients" << std::endl;
   std::unordered_set<tcp_connection*>::iterator connection_iterator = connection_list.begin();
   while(connection_iterator != connection_list.end()) {
     (*connection_iterator)->write(m);
