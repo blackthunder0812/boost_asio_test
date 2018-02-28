@@ -15,9 +15,8 @@ void tcp_server::start_accept()
 void tcp_server::accept_handler(boost::shared_ptr<tcp_connection> connection_ptr, const boost::system::error_code &err)
 {
   if(!err) {
-    // TODO: lock
-    connection_list.push_back(connection_ptr.get());
-    // TODO: unlock
+    std::cout << "Client " << connection_ptr->socket().remote_endpoint().address().to_string() << ":" << connection_ptr->socket().remote_endpoint().port() << " connected" << std::endl;
+    connection_list.insert(connection_ptr.get());
     connection_ptr->start();
     start_accept();
   } else {
@@ -31,7 +30,17 @@ tcp_server::tcp_server(boost::asio::io_service &io_service) :
   start_accept();
 }
 
-std::list<tcp_connection *> &tcp_server::get_connection_list()
+std::unordered_set<tcp_connection *> &tcp_server::get_connection_list()
 {
   return connection_list;
+}
+
+void tcp_server::broadcast_message(const std::string& message)
+{
+  boost::shared_ptr<std::string> m(new std::string(message));
+  std::unordered_set<tcp_connection*>::iterator connection_iterator = connection_list.begin();
+  while(connection_iterator != connection_list.end()) {
+    (*connection_iterator)->write(m);
+    connection_iterator++;
+  }
 }

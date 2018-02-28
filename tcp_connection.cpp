@@ -12,9 +12,7 @@ tcp_connection::tcp_connection(boost::asio::io_service &io_service, tcp_server *
 
 tcp_connection::~tcp_connection()
 {
-  // TODO: lock, remove original shared_ptr to this
-  tcp_server_ptr->get_connection_list().remove(this);
-  // TODO: unlock
+  tcp_server_ptr->get_connection_list().erase(this);
 }
 
 void tcp_connection::write(boost::shared_ptr<std::string> message)
@@ -50,7 +48,7 @@ void tcp_connection::read_header_handler(const boost::system::error_code &err)
 {
   if(!err) {
     unsigned int payload_length = boost::endian::big_to_native(*(unsigned int*)(read_header_buffer.data()));
-    std::cout << "Payload length: " << payload_length << std::endl;
+//    std::cout << "Payload length: " << payload_length << std::endl;
     // TODO: if payload_length = 0 -> heartbear package
     // switch
     read_payload(payload_length);

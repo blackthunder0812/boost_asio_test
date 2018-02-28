@@ -5,10 +5,12 @@ CONFIG -= qt
 
 SOURCES += main.cpp \
     tcp_server.cpp \
-    tcp_connection.cpp
+    tcp_connection.cpp \
+    console_handler.cpp
 
-LIBS += -lboost_system -lpthread
+LIBS += -lboost_system
 
 HEADERS += \
     tcp_server.hpp \
-    tcp_connection.hpp
+    tcp_connection.hpp \
+    console_handler.hpp
