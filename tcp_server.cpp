@@ -20,7 +20,9 @@ void tcp_server::accept_handler(boost::shared_ptr<tcp_connection> connection_ptr
     connection_ptr->start();
     start_accept();
   } else {
-    std::cerr << "Error on accepting new connection: " << err.message() << std::endl;
+    if (err != boost::asio::error::operation_aborted) {
+      std::cerr << "Error on accepting new connection: " << err.message() << std::endl;
+    }
   }
 }
 
@@ -43,5 +45,20 @@ void tcp_server::broadcast_message(const std::string& message)
   while(connection_iterator != connection_list.end()) {
     (*connection_iterator)->write(m);
     connection_iterator++;
+  }
+}
+
+void tcp_server::stop()
+{
+  while(!connection_list.empty()) {
+    (*connection_list.begin())->close();
+  }
+  acceptor_.close();
+}
+
+void tcp_server::clear()
+{
+  while(!connection_list.empty()) {
+    (*connection_list.begin())->close();
   }
 }

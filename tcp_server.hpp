@@ -15,6 +15,8 @@ class tcp_server
     tcp_server(boost::asio::io_service &io_service);
     std::unordered_set<tcp_connection*>& get_connection_list();
     void broadcast_message(const std::string &message);
+    void stop();
+    void clear();
 };
 
 #endif // TCP_SERVER_HPP

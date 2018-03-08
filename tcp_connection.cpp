@@ -10,11 +10,6 @@ tcp_connection::tcp_connection(boost::asio::io_service &io_service, tcp_server *
 
 }
 
-tcp_connection::~tcp_connection()
-{
-  tcp_server_ptr->get_connection_list().erase(this);
-}
-
 void tcp_connection::write(boost::shared_ptr<std::string> message)
 {
   boost::asio::async_write(socket_,
@@ -24,14 +19,27 @@ void tcp_connection::write(boost::shared_ptr<std::string> message)
                                        boost::asio::placeholders::error));
 }
 
+void tcp_connection::close()
+{
+  tcp_server_ptr->get_connection_list().erase(this);
+  socket_.cancel();
+}
+
 void tcp_connection::write_handler(const boost::system::error_code &err)
 {
   if (err) {
     if (err != boost::asio::error::eof) {
-      std::cerr << "Error writing to client " << socket_.remote_endpoint().address().to_string() << ":" << socket_.remote_endpoint().port() << " : " << err.message() << std::endl;
+      if (err == boost::asio::error::operation_aborted) {
+        tcp_server_ptr->get_connection_list().erase(this);
+        socket_.close();
+      } else {
+        std::cerr << "Error writing to client " << socket_.remote_endpoint().address().to_string() << ":" << socket_.remote_endpoint().port() << " : " << err.message() << std::endl;
+      }
     } else {
       std::cout << "Connection to " << socket_.remote_endpoint().address().to_string() << ":" << socket_.remote_endpoint().port() << " closed" << std::endl;
     }
+    tcp_server_ptr->get_connection_list().erase(this);
+    socket_.close();
   }
 }
 
@@ -56,7 +64,12 @@ void tcp_connection::read_header_handler(const boost::system::error_code &err)
     }
   } else {
     if (err != boost::asio::error::eof) {
-      std::cerr << "Error reading from client " << socket_.remote_endpoint().address().to_string() << ":" << socket_.remote_endpoint().port() << " : " << err.message() << std::endl;
+      if (err == boost::asio::error::operation_aborted) {
+        tcp_server_ptr->get_connection_list().erase(this);
+        socket_.close();
+      } else {
+        std::cerr << "Error reading payload size from client " << socket_.remote_endpoint().address().to_string() << ":" << socket_.remote_endpoint().port() << " : " << err.message() << std::endl;
+      }
     } else {
       std::cout << "Connection to " << socket_.remote_endpoint().address().to_string() << ":" << socket_.remote_endpoint().port() << " closed" << std::endl;
     }
@@ -65,7 +78,7 @@ void tcp_connection::read_header_handler(const boost::system::error_code &err)
 
 void tcp_connection::read_payload(unsigned int payload_length)
 {
-  boost::shared_ptr<char> payload_ptr = boost::shared_ptr<char>(new char[payload_length], [](char *p){delete[] p;});
+  boost::shared_ptr<char> payload_ptr(new char[payload_length]);
   boost::asio::async_read(socket_,
                           boost::asio::buffer(payload_ptr.get(), payload_length),
                           boost::bind(&tcp_connection::read_payload_handler,
@@ -82,10 +95,17 @@ void tcp_connection::read_payload_handler(boost::shared_ptr<char> payload_ptr, c
     read_header();
   } else {
     if (err != boost::asio::error::eof) {
-      std::cerr << "Error reading from client " << socket_.remote_endpoint().address().to_string() << ":" << socket_.remote_endpoint().port() << " : " << err.message() << std::endl;
+      if (err == boost::asio::error::operation_aborted) {
+        tcp_server_ptr->get_connection_list().erase(this);
+        socket_.close();
+      } else {
+        std::cerr << "Error reading from client " << socket_.remote_endpoint().address().to_string() << ":" << socket_.remote_endpoint().port() << " : " << err.message() << std::endl;
+      }
     } else {
       std::cout << "Connection to " << socket_.remote_endpoint().address().to_string() << ":" << socket_.remote_endpoint().port() << " closed" << std::endl;
     }
+    tcp_server_ptr->get_connection_list().erase(this);
+    socket_.close();
   }
 }
 

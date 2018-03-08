@@ -24,12 +24,16 @@ void console_handler::read_handler(const boost::system::error_code &err, size_t 
     std::cout << "Buffer size: " << read_buffer_.size() << " bytes. Read: " << byte_read << " bytes: " << data << std::endl;
     read_buffer_.consume(byte_read);
 
-//    if (data.compare("exit\n") == 0)
-//      return;
-    // send all message to clients
-    tcpserver->broadcast_message(data);
-
-    read();
+    if (data.compare("exit\n") == 0) {
+      tcpserver->stop();
+    } else if (data.compare("clear\n") == 0) {
+      tcpserver->clear();
+      read();
+    } else {
+      // send all message to clients
+      tcpserver->broadcast_message(data);
+      read();
+    }
   }
 }
 

@@ -26,7 +26,7 @@ class tcp_connection : public boost::enable_shared_from_this<tcp_connection>
     boost::asio::ip::tcp::socket& socket();
     void start();
     void write(boost::shared_ptr<std::string> message);
-    ~tcp_connection();
+    void close();
 };
 
 #endif // TCP_CONNECTION_HPP
