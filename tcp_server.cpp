@@ -50,10 +50,10 @@ void tcp_server::broadcast_message(const std::string& message)
 
 void tcp_server::stop()
 {
+  acceptor_.close();
   while(!connection_list.empty()) {
     (*connection_list.begin())->close();
   }
-  acceptor_.close();
 }
 
 void tcp_server::clear()
