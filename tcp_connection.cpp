@@ -22,7 +22,7 @@ void tcp_connection::write(boost::shared_ptr<std::string> message)
 void tcp_connection::close()
 {
   tcp_server_ptr->get_connection_list().erase(this);
-  socket_.cancel();
+  socket_.close();
 }
 
 void tcp_connection::write_handler(const boost::system::error_code &err)
@@ -30,14 +30,14 @@ void tcp_connection::write_handler(const boost::system::error_code &err)
   if (err) {
     if (err != boost::asio::error::eof) {
       if (err == boost::asio::error::operation_aborted) {
-        tcp_server_ptr->get_connection_list().erase(this);
-        socket_.close();
+        std::cerr << "Operation canceled" << std::endl;
       } else {
         std::cerr << "Error writing to client " << socket_.remote_endpoint().address().to_string() << ":" << socket_.remote_endpoint().port() << " : " << err.message() << std::endl;
       }
     } else {
       std::cout << "Connection to " << socket_.remote_endpoint().address().to_string() << ":" << socket_.remote_endpoint().port() << " closed" << std::endl;
     }
+
     tcp_server_ptr->get_connection_list().erase(this);
     socket_.close();
   }
@@ -65,14 +65,16 @@ void tcp_connection::read_header_handler(const boost::system::error_code &err)
   } else {
     if (err != boost::asio::error::eof) {
       if (err == boost::asio::error::operation_aborted) {
-        tcp_server_ptr->get_connection_list().erase(this);
-        socket_.close();
+        std::cerr << "Operation canceled" << std::endl;
       } else {
         std::cerr << "Error reading payload size from client " << socket_.remote_endpoint().address().to_string() << ":" << socket_.remote_endpoint().port() << " : " << err.message() << std::endl;
       }
     } else {
       std::cout << "Connection to " << socket_.remote_endpoint().address().to_string() << ":" << socket_.remote_endpoint().port() << " closed" << std::endl;
     }
+
+    tcp_server_ptr->get_connection_list().erase(this);
+    socket_.close();
   }
 }
 
@@ -96,14 +98,14 @@ void tcp_connection::read_payload_handler(boost::shared_ptr<char> payload_ptr, c
   } else {
     if (err != boost::asio::error::eof) {
       if (err == boost::asio::error::operation_aborted) {
-        tcp_server_ptr->get_connection_list().erase(this);
-        socket_.close();
+        std::cerr << "Operation canceled" << std::endl;
       } else {
         std::cerr << "Error reading from client " << socket_.remote_endpoint().address().to_string() << ":" << socket_.remote_endpoint().port() << " : " << err.message() << std::endl;
       }
     } else {
       std::cout << "Connection to " << socket_.remote_endpoint().address().to_string() << ":" << socket_.remote_endpoint().port() << " closed" << std::endl;
     }
+
     tcp_server_ptr->get_connection_list().erase(this);
     socket_.close();
   }
