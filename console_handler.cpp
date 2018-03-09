@@ -32,6 +32,11 @@ void console_handler::read_handler(const boost::system::error_code &err, size_t 
       return;
     } else if (console_command.compare("clear\n") == 0) {
       tcpserver->clear(); // close all connections but keep accepting new connections
+    } else if (console_command.compare("info\n") == 0) {
+      std::cout << "Connection list: " << std::endl;
+      for(auto conn : tcpserver->get_connection_list()) {
+        std::cout << conn->socket().remote_endpoint().address().to_string() << ":" << conn->socket().remote_endpoint().port() << std::endl;
+      }
     } else if (console_command.compare("hb\n") == 0) {
       boost::shared_ptr<std::vector<unsigned char>> data(new std::vector<unsigned char>(tcp_connection::HEADER_SIZE));
       *(unsigned int*)((*data).data()) = 0;
