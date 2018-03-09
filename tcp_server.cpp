@@ -21,7 +21,9 @@ void tcp_server::accept_handler(boost::shared_ptr<tcp_connection> connection_ptr
     connection_ptr->start();
     start_accept();
   } else {
-    if (err != boost::asio::error::operation_aborted) {
+    if (err == boost::asio::error::operation_aborted) {
+      std::cerr << "Acceptor closed" << std::endl;
+    } else {
       std::cerr << "Error on accepting new connection: " << err.message() << std::endl;
     }
   }
@@ -61,4 +63,14 @@ void tcp_server::clear()
   while(!connection_list.empty()) {
     (*connection_list.begin())->close();
   }
+}
+
+bool tcp_server::is_accepting()
+{
+  return acceptor_.is_open();
+}
+
+void tcp_server::unaccept()
+{
+  acceptor_.close();
 }

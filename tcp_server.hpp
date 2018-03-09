@@ -17,6 +17,8 @@ class tcp_server
     void broadcast_message(boost::shared_ptr<std::vector<unsigned char>> message);
     void stop();
     void clear();
+    bool is_accepting();
+    void unaccept();
 };
 
 #endif // TCP_SERVER_HPP

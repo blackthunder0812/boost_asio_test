@@ -32,23 +32,42 @@ void console_handler::read_handler(const boost::system::error_code &err, size_t 
       return;
     } else if (console_command.compare("clear\n") == 0) {
       tcpserver->clear(); // close all connections but keep accepting new connections
+    } else if (console_command.compare("unaccept\n") == 0) {
+      tcpserver->unaccept(); // close all connections but keep accepting new connections
     } else if (console_command.compare("info\n") == 0) {
-      std::cout << "Connection list: " << std::endl;
-      for(auto conn : tcpserver->get_connection_list()) {
-        std::cout << conn->socket().remote_endpoint().address().to_string() << ":" << conn->socket().remote_endpoint().port() << std::endl;
+      if (tcpserver->is_accepting()) {
+        std::cout << "Server is accepting" << std::endl;
+      } else {
+        std::cout << "Server is NOT accepting" << std::endl;
+      }
+      if (tcpserver->get_connection_list().empty()) {
+        std::cout << "No client" << std::endl;
+      } else {
+        std::cout << "Connection list: " << std::endl;
+        for(auto conn : tcpserver->get_connection_list()) {
+          std::cout << conn->socket().remote_endpoint().address().to_string() << ":" << conn->socket().remote_endpoint().port() << std::endl;
+        }
       }
     } else if (console_command.compare("hb\n") == 0) {
-      boost::shared_ptr<std::vector<unsigned char>> data(new std::vector<unsigned char>(tcp_connection::HEADER_SIZE));
-      *(unsigned int*)((*data).data()) = 0;
-      (*data).at(4) = 0x55; (*data).at(5) = 0xAA;
-      tcpserver->broadcast_message(data);
+      if (tcpserver->get_connection_list().empty()) {
+        std::cout << "No client" << std::endl;
+      } else {
+        boost::shared_ptr<std::vector<unsigned char>> data(new std::vector<unsigned char>(tcp_connection::HEADER_SIZE));
+        *(unsigned int*)((*data).data()) = 0;
+        (*data).at(4) = 0x55; (*data).at(5) = 0xAA;
+        tcpserver->broadcast_message(data);
+      }
     } else {
-      unsigned int data_len = tcp_connection::HEADER_SIZE + byte_read;
-      boost::shared_ptr<std::vector<unsigned char>> data(new std::vector<unsigned char>(data_len));
-      *(unsigned int*)((*data).data()) = boost::endian::native_to_big((unsigned int)byte_read);
-      (*data).at(4) = 0x55; (*data).at(5) = 0xAA;
-      memcpy((*data).data() + tcp_connection::HEADER_SIZE, console_command.data(), byte_read);
-      tcpserver->broadcast_message(data);
+      if (tcpserver->get_connection_list().empty()) {
+        std::cout << "No client" << std::endl;
+      } else {
+        unsigned int data_len = tcp_connection::HEADER_SIZE + byte_read;
+        boost::shared_ptr<std::vector<unsigned char>> data(new std::vector<unsigned char>(data_len));
+        *(unsigned int*)((*data).data()) = boost::endian::native_to_big((unsigned int)byte_read);
+        (*data).at(4) = 0x55; (*data).at(5) = 0xAA;
+        memcpy((*data).data() + tcp_connection::HEADER_SIZE, console_command.data(), byte_read);
+        tcpserver->broadcast_message(data);
+      }
     }
 
     read();
