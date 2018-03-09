@@ -2,8 +2,8 @@
 #define TCP_SERVER_HPP
 #include <unordered_set>
 #include <boost/asio.hpp>
-#include "tcp_connection.hpp"
 
+class tcp_connection;
 class tcp_server
 {
   private:
@@ -14,7 +14,7 @@ class tcp_server
   public:
     tcp_server(boost::asio::io_service &io_service);
     std::unordered_set<tcp_connection*>& get_connection_list();
-    void broadcast_message(const std::string &message);
+    void broadcast_message(boost::shared_ptr<std::vector<unsigned char>> message);
     void stop();
     void clear();
 };

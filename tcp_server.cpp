@@ -1,6 +1,7 @@
 #include <iostream>
 #include <boost/bind.hpp>
 #include "tcp_server.hpp"
+#include "tcp_connection.hpp"
 
 void tcp_server::start_accept()
 {
@@ -37,13 +38,12 @@ std::unordered_set<tcp_connection *> &tcp_server::get_connection_list()
   return connection_list;
 }
 
-void tcp_server::broadcast_message(const std::string& message)
+void tcp_server::broadcast_message(boost::shared_ptr<std::vector<unsigned char>> message)
 {
-  boost::shared_ptr<std::string> m(new std::string(message));
-  std::cout << "Sending message " << *(m.get()) << " to " << connection_list.size() << " clients" << std::endl;
+//  std::cout << "Sending message " << *message << " to " << connection_list.size() << " clients" << std::endl;
   std::unordered_set<tcp_connection*>::iterator connection_iterator = connection_list.begin();
   while(connection_iterator != connection_list.end()) {
-    (*connection_iterator)->write(m);
+    (*connection_iterator)->write(message);
     connection_iterator++;
   }
 }
