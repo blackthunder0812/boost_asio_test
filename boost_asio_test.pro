@@ -1,7 +1,9 @@
 TEMPLATE = app
-CONFIG += console c++17
+CONFIG += console
 CONFIG -= app_bundle
 CONFIG -= qt
+
+QMAKE_CXXFLAGS += -std=c++17
 
 SOURCES += main.cpp \
     tcp_server.cpp \
@@ -13,4 +15,5 @@ LIBS += -lboost_system
 HEADERS += \
     tcp_server.hpp \
     tcp_connection.hpp \
-    console_handler.hpp
+    console_handler.hpp \
+    demangle.h
