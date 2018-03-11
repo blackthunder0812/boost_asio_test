@@ -20,8 +20,8 @@ class tcp_connection : public boost::enable_shared_from_this<tcp_connection>
     void read_header();
     void read_header_handler (const boost::system::error_code& err);
     void read_payload(unsigned int payload_length);
-    void read_payload_handler(boost::shared_ptr<std::vector<unsigned char>> payload_ptr, const boost::system::error_code& err, size_t byte_transfered);
-    void process_message(boost::shared_ptr<std::vector<unsigned char>> payload_ptr, size_t byte_transfered);
+    void read_payload_handler(boost::shared_ptr<std::vector<unsigned char>> payload_ptr, const boost::system::error_code& err);
+    void process_message(boost::shared_ptr<std::vector<unsigned char>> payload_ptr);
 
   public:
     static boost::shared_ptr<tcp_connection> create_connection(boost::asio::io_service &io_service, tcp_server *tcp_server_ptr);

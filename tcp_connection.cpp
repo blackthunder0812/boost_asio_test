@@ -68,7 +68,7 @@ void tcp_connection::read_header_handler(const boost::system::error_code &err)
     socket_.close();
   } else {
     if (read_header_buffer.data()[4] != 0x55 || read_header_buffer.data()[5] != 0xAA) {
-      std::cerr << "Invalid signature" << std::endl;
+      std::cerr << "Invalid signature: " << std::hex << read_header_buffer.data()[4] << read_header_buffer.data()[5] << std::endl;
       tcp_server_ptr->get_connection_list().erase(this);
       socket_.close();
     } else {
@@ -85,17 +85,17 @@ void tcp_connection::read_header_handler(const boost::system::error_code &err)
 
 void tcp_connection::read_payload(unsigned int payload_length)
 {
+
   boost::shared_ptr<std::vector<unsigned char>> payload_ptr(new std::vector<unsigned char>(payload_length));
   boost::asio::async_read(socket_,
                           boost::asio::buffer(*payload_ptr),
                           boost::bind(&tcp_connection::read_payload_handler,
                                       shared_from_this(),
                                       payload_ptr,
-                                      boost::asio::placeholders::error,
-                                      boost::asio::placeholders::bytes_transferred));
+                                      boost::asio::placeholders::error));
 }
 
-void tcp_connection::read_payload_handler(boost::shared_ptr<std::vector<unsigned char>> payload_ptr, const boost::system::error_code &err, size_t byte_transfered)
+void tcp_connection::read_payload_handler(boost::shared_ptr<std::vector<unsigned char>> payload_ptr, const boost::system::error_code &err)
 {
   if(err) {
     if (err != boost::asio::error::eof) {
@@ -110,15 +110,16 @@ void tcp_connection::read_payload_handler(boost::shared_ptr<std::vector<unsigned
     tcp_server_ptr->get_connection_list().erase(this);
     socket_.close();
   } else {
-    process_message(payload_ptr, byte_transfered);
+    process_message(payload_ptr);
     read_header();
   }
 }
 
-void tcp_connection::process_message(boost::shared_ptr<std::vector<unsigned char>> payload_ptr, size_t byte_transfered)
+void tcp_connection::process_message(boost::shared_ptr<std::vector<unsigned char>> payload_ptr)
 {
-  for (size_t i = 0; i < byte_transfered; i++) {
-    std::cout << (*payload_ptr).at(i);
+  size_t payload_size = payload_ptr->size();
+  for (size_t i = 0; i < payload_size; i++) {
+    std::cout << (*payload_ptr)[i];
   }
   std::cout << std::endl;
 }

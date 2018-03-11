@@ -26,11 +26,13 @@ void console_handler::read_handler(const boost::system::error_code &err, size_t 
     std::cerr << "Error reading from stdin: " << err.message() << std::endl;
   } else {
     unsigned int buffer_size = tcp_connection::HEADER_SIZE + byte_read;
-    boost::shared_ptr<std::vector<unsigned char>> command(new std::vector<unsigned char>(buffer_size));
+    boost::shared_ptr<std::vector<unsigned char>> command(new std::vector<unsigned char>());
+    command->reserve(buffer_size);
     boost::asio::buffers_iterator<boost::asio::const_buffers_1, unsigned char> buffer_iter = boost::asio::buffers_iterator<boost::asio::const_buffers_1, unsigned char>::begin(read_buffer_.data());
 
+    command->assign(tcp_connection::HEADER_SIZE, 0x00);
     for (size_t i = tcp_connection::HEADER_SIZE; i < buffer_size; i++) {
-      (*command)[i] = *buffer_iter++;
+      command->emplace_back(*buffer_iter++);
     }
     read_buffer_.consume(byte_read);
 
@@ -60,7 +62,7 @@ void console_handler::read_handler(const boost::system::error_code &err, size_t 
         std::cout << "No client" << std::endl;
       } else {
         *(unsigned int*)((*command).data()) = 0;
-        (*command).at(4) = 0x55; (*command).at(5) = 0xAA;
+        (*command)[4] = 0x55; (*command)[5] = 0xAA;
         tcpserver->broadcast_message(command);
       }
     } else {
@@ -68,7 +70,7 @@ void console_handler::read_handler(const boost::system::error_code &err, size_t 
         std::cout << "No client" << std::endl;
       } else {
         *(unsigned int*)((*command).data()) = boost::endian::native_to_big((unsigned int)byte_read);
-        (*command).at(4) = 0x55; (*command).at(5) = 0xAA;
+        (*command)[4] = 0x55; (*command)[5] = 0xAA;
         tcpserver->broadcast_message(command);
       }
     }
