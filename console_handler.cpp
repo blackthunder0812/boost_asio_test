@@ -1,12 +1,11 @@
 #include "console_handler.hpp"
 #include "tcp_server.hpp"
 #include <iostream>
-#include <boost/bind.hpp>
 #include <boost/endian/conversion.hpp>
 #include <vector>
 #include "tcp_connection.hpp"
 #include <string>
-#include <string_view>
+#include <functional>
 #include "demangle.h"
 
 void console_handler::read()
@@ -14,10 +13,10 @@ void console_handler::read()
   boost::asio::async_read_until(input_stream_,
                                 read_buffer_,
                                 '\n',
-                                boost::bind(&console_handler::read_handler,
+                                std::bind(&console_handler::read_handler,
                                             this,
-                                            boost::asio::placeholders::error,
-                                            boost::asio::placeholders::bytes_transferred));
+                                            std::placeholders::_1,
+                                            std::placeholders::_2));
 }
 
 void console_handler::read_handler(const boost::system::error_code &err, size_t byte_read)

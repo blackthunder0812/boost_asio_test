@@ -3,6 +3,7 @@
 #include <boost/endian/conversion.hpp>
 #include <vector>
 #include "tcp_server.hpp"
+#include <functional>
 
 tcp_connection::tcp_connection(boost::asio::io_service &io_service, tcp_server *tcp_server_ptr) :
   socket_(io_service),
@@ -15,9 +16,9 @@ void tcp_connection::write(std::shared_ptr<std::vector<unsigned char>> message)
 {
   boost::asio::async_write(socket_,
                            boost::asio::buffer(*message),
-                           boost::bind(&tcp_connection::write_handler,
+                           std::bind(&tcp_connection::write_handler,
                                        shared_from_this(),
-                                       boost::asio::placeholders::error));
+                                       std::placeholders::_1));
 }
 
 void tcp_connection::close()
@@ -47,9 +48,9 @@ void tcp_connection::read_header()
 {
   boost::asio::async_read(socket_,
                           boost::asio::buffer(read_header_buffer),
-                          boost::bind(&tcp_connection::read_header_handler,
+                          std::bind(&tcp_connection::read_header_handler,
                                       shared_from_this(),
-                                      boost::asio::placeholders::error));
+                                      std::placeholders::_1));
 }
 
 void tcp_connection::read_header_handler(const boost::system::error_code &err)
@@ -88,10 +89,10 @@ void tcp_connection::read_payload(unsigned int payload_length)
   std::shared_ptr<std::vector<unsigned char>> payload_ptr(new std::vector<unsigned char>(payload_length));
   boost::asio::async_read(socket_,
                           boost::asio::buffer(*payload_ptr),
-                          boost::bind(&tcp_connection::read_payload_handler,
+                          std::bind(&tcp_connection::read_payload_handler,
                                       shared_from_this(),
                                       payload_ptr,
-                                      boost::asio::placeholders::error));
+                                      std::placeholders::_1));
 }
 
 void tcp_connection::read_payload_handler(std::shared_ptr<std::vector<unsigned char>> payload_ptr, const boost::system::error_code &err)

@@ -1,7 +1,6 @@
 #ifndef TCP_CONNECTION_HPP
 #define TCP_CONNECTION_HPP
 #include <boost/asio.hpp>
-#include <boost/bind.hpp>
 #include <boost/array.hpp>
 #include <memory>
 

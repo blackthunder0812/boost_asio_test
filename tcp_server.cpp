@@ -1,5 +1,4 @@
 #include <iostream>
-#include <boost/bind.hpp>
 #include "tcp_server.hpp"
 #include "tcp_connection.hpp"
 
@@ -7,10 +6,10 @@ void tcp_server::start_accept()
 {
   std::shared_ptr<tcp_connection> new_connection_ptr = tcp_connection::create_connection(acceptor_.get_io_service(), this);
   acceptor_.async_accept(new_connection_ptr->socket(),
-                         boost::bind(&tcp_server::accept_handler,
+                         std::bind(&tcp_server::accept_handler,
                                      this,
                                      new_connection_ptr,
-                                     boost::asio::placeholders::error));
+                                     std::placeholders::_1));
 }
 
 void tcp_server::accept_handler(std::shared_ptr<tcp_connection> connection_ptr, const boost::system::error_code &err)
