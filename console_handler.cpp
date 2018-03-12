@@ -26,7 +26,7 @@ void console_handler::read_handler(const boost::system::error_code &err, size_t 
     std::cerr << "Error reading from stdin: " << err.message() << std::endl;
   } else {
     unsigned int buffer_size = tcp_connection::HEADER_SIZE + byte_read;
-    boost::shared_ptr<std::vector<unsigned char>> command(new std::vector<unsigned char>());
+    std::shared_ptr<std::vector<unsigned char>> command(new std::vector<unsigned char>());
     command->reserve(buffer_size);
     boost::asio::buffers_iterator<boost::asio::const_buffer, unsigned char> buffer_iter = boost::asio::buffers_iterator<boost::asio::const_buffer, unsigned char>::begin(read_buffer_.data());
 

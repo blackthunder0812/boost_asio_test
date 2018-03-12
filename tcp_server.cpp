@@ -5,7 +5,7 @@
 
 void tcp_server::start_accept()
 {
-  boost::shared_ptr<tcp_connection> new_connection_ptr = tcp_connection::create_connection(acceptor_.get_io_service(), this);
+  std::shared_ptr<tcp_connection> new_connection_ptr = tcp_connection::create_connection(acceptor_.get_io_service(), this);
   acceptor_.async_accept(new_connection_ptr->socket(),
                          boost::bind(&tcp_server::accept_handler,
                                      this,
@@ -13,7 +13,7 @@ void tcp_server::start_accept()
                                      boost::asio::placeholders::error));
 }
 
-void tcp_server::accept_handler(boost::shared_ptr<tcp_connection> connection_ptr, const boost::system::error_code &err)
+void tcp_server::accept_handler(std::shared_ptr<tcp_connection> connection_ptr, const boost::system::error_code &err)
 {
   if(!err) {
     std::cout << "Client " << connection_ptr->socket().remote_endpoint().address().to_string() << ":" << connection_ptr->socket().remote_endpoint().port() << " connected" << std::endl;
@@ -40,7 +40,7 @@ std::unordered_set<tcp_connection *> &tcp_server::get_connection_list()
   return connection_list;
 }
 
-void tcp_server::broadcast_message(boost::shared_ptr<std::vector<unsigned char>> message)
+void tcp_server::broadcast_message(std::shared_ptr<std::vector<unsigned char>> message)
 {
 //  std::cout << "Sending message " << *message << " to " << connection_list.size() << " clients" << std::endl;
   std::unordered_set<tcp_connection*>::iterator connection_iterator = connection_list.begin();

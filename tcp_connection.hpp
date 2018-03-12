@@ -3,7 +3,7 @@
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
 #include <boost/array.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <boost/enable_shared_from_this.hpp>
 
 class tcp_server;
@@ -20,14 +20,14 @@ class tcp_connection : public boost::enable_shared_from_this<tcp_connection>
     void read_header();
     void read_header_handler (const boost::system::error_code& err);
     void read_payload(unsigned int payload_length);
-    void read_payload_handler(boost::shared_ptr<std::vector<unsigned char>> payload_ptr, const boost::system::error_code& err);
-    void process_message(boost::shared_ptr<std::vector<unsigned char>> payload_ptr);
+    void read_payload_handler(std::shared_ptr<std::vector<unsigned char>> payload_ptr, const boost::system::error_code& err);
+    void process_message(std::shared_ptr<std::vector<unsigned char>> payload_ptr);
 
   public:
-    static boost::shared_ptr<tcp_connection> create_connection(boost::asio::io_service &io_service, tcp_server *tcp_server_ptr);
+    static std::shared_ptr<tcp_connection> create_connection(boost::asio::io_service &io_service, tcp_server *tcp_server_ptr);
     boost::asio::ip::tcp::socket& socket();
     void start();
-    void write(boost::shared_ptr<std::vector<unsigned char>> message);
+    void write(std::shared_ptr<std::vector<unsigned char>> message);
     void close();
 };
 

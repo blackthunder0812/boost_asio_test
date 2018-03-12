@@ -11,7 +11,7 @@ tcp_connection::tcp_connection(boost::asio::io_service &io_service, tcp_server *
 
 }
 
-void tcp_connection::write(boost::shared_ptr<std::vector<unsigned char>> message)
+void tcp_connection::write(std::shared_ptr<std::vector<unsigned char>> message)
 {
   boost::asio::async_write(socket_,
                            boost::asio::buffer(*message),
@@ -85,7 +85,7 @@ void tcp_connection::read_header_handler(const boost::system::error_code &err)
 
 void tcp_connection::read_payload(unsigned int payload_length)
 {
-  boost::shared_ptr<std::vector<unsigned char>> payload_ptr(new std::vector<unsigned char>(payload_length));
+  std::shared_ptr<std::vector<unsigned char>> payload_ptr(new std::vector<unsigned char>(payload_length));
   boost::asio::async_read(socket_,
                           boost::asio::buffer(*payload_ptr),
                           boost::bind(&tcp_connection::read_payload_handler,
@@ -94,7 +94,7 @@ void tcp_connection::read_payload(unsigned int payload_length)
                                       boost::asio::placeholders::error));
 }
 
-void tcp_connection::read_payload_handler(boost::shared_ptr<std::vector<unsigned char>> payload_ptr, const boost::system::error_code &err)
+void tcp_connection::read_payload_handler(std::shared_ptr<std::vector<unsigned char>> payload_ptr, const boost::system::error_code &err)
 {
   if(err) {
     if (err != boost::asio::error::eof) {
@@ -114,7 +114,7 @@ void tcp_connection::read_payload_handler(boost::shared_ptr<std::vector<unsigned
   }
 }
 
-void tcp_connection::process_message(boost::shared_ptr<std::vector<unsigned char>> payload_ptr)
+void tcp_connection::process_message(std::shared_ptr<std::vector<unsigned char>> payload_ptr)
 {
   size_t payload_size = payload_ptr->size();
   for (size_t i = 0; i < payload_size; i++) {
@@ -123,9 +123,9 @@ void tcp_connection::process_message(boost::shared_ptr<std::vector<unsigned char
   std::cout << std::endl;
 }
 
-boost::shared_ptr<tcp_connection> tcp_connection::create_connection(boost::asio::io_service &io_service, tcp_server *tcp_server_ptr)
+std::shared_ptr<tcp_connection> tcp_connection::create_connection(boost::asio::io_service &io_service, tcp_server *tcp_server_ptr)
 {
-  return boost::shared_ptr<tcp_connection>(new tcp_connection(io_service, tcp_server_ptr));
+  return std::shared_ptr<tcp_connection>(new tcp_connection(io_service, tcp_server_ptr));
 }
 
 boost::asio::ip::tcp::socket &tcp_connection::socket()
