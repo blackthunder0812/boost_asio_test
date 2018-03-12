@@ -4,10 +4,9 @@
 #include <boost/bind.hpp>
 #include <boost/array.hpp>
 #include <memory>
-#include <boost/enable_shared_from_this.hpp>
 
 class tcp_server;
-class tcp_connection : public boost::enable_shared_from_this<tcp_connection>
+class tcp_connection : public std::enable_shared_from_this<tcp_connection>
 {
   public:
     static const unsigned int HEADER_SIZE = 8; // first 4 bytes: payload length, next 2 byte: signature: 0x55AA, next 1 byte: opcode, last byte: reserve
