@@ -85,7 +85,6 @@ void tcp_connection::read_header_handler(const boost::system::error_code &err)
 
 void tcp_connection::read_payload(unsigned int payload_length)
 {
-
   boost::shared_ptr<std::vector<unsigned char>> payload_ptr(new std::vector<unsigned char>(payload_length));
   boost::asio::async_read(socket_,
                           boost::asio::buffer(*payload_ptr),

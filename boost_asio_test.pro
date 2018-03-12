@@ -5,12 +5,14 @@ CONFIG -= qt
 
 QMAKE_CXXFLAGS += -std=c++17
 
+#QMAKE_LFLAGS += -static -static-libstdc++ -static-libgcc
+
 SOURCES += main.cpp \
     tcp_server.cpp \
     tcp_connection.cpp \
     console_handler.cpp
 
-LIBS += -lboost_system
+LIBS += -lboost_system -lpthread
 
 HEADERS += \
     tcp_server.hpp \
