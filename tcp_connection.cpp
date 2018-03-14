@@ -1,8 +1,8 @@
-#include <iostream>
 #include "tcp_connection.hpp"
+#include "tcp_server.hpp"
+#include <iostream>
 #include <boost/endian/conversion.hpp>
 #include <vector>
-#include "tcp_server.hpp"
 #include <functional>
 
 tcp_connection::tcp_connection(boost::asio::io_service &io_service, tcp_server *tcp_server_ptr) :
@@ -84,18 +84,19 @@ void tcp_connection::read_header_handler(const boost::system::error_code &err)
   }
 }
 
+// TODO: Create custom handler allocator
 void tcp_connection::read_payload(unsigned int payload_length)
 {
-  std::shared_ptr<std::vector<unsigned char>> payload_ptr(new std::vector<unsigned char>(payload_length));
+  std::unique_ptr<std::vector<unsigned char>> payload_ptr(new std::vector<unsigned char>(payload_length));
   boost::asio::async_read(socket_,
-                          boost::asio::buffer(*payload_ptr),
+                          boost::asio::buffer(payload_ptr->data(), payload_length),
                           std::bind(&tcp_connection::read_payload_handler,
                                       shared_from_this(),
-                                      payload_ptr,
+                                      std::move(payload_ptr),
                                       std::placeholders::_1));
 }
 
-void tcp_connection::read_payload_handler(std::shared_ptr<std::vector<unsigned char>> payload_ptr, const boost::system::error_code &err)
+void tcp_connection::read_payload_handler(std::unique_ptr<std::vector<unsigned char>> payload_ptr, const boost::system::error_code &err)
 {
   if(err) {
     if (err != boost::asio::error::eof) {
@@ -110,12 +111,12 @@ void tcp_connection::read_payload_handler(std::shared_ptr<std::vector<unsigned c
     tcp_server_ptr->get_connection_list().erase(this);
     socket_.close();
   } else {
-    process_message(payload_ptr);
+    process_message(std::move(payload_ptr));
     read_header();
   }
 }
 
-void tcp_connection::process_message(std::shared_ptr<std::vector<unsigned char>> payload_ptr)
+void tcp_connection::process_message(std::unique_ptr<std::vector<unsigned char>> payload_ptr)
 {
   size_t payload_size = payload_ptr->size();
   for (size_t i = 0; i < payload_size; i++) {

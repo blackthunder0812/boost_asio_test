@@ -19,3 +19,5 @@ HEADERS += \
     tcp_connection.hpp \
     console_handler.hpp \
     demangle.h
+
+DEFINES += BOOST_ASIO_DISABLE_HANDLER_TYPE_REQUIREMENTS BOOST_ASIO_HAS_MOVE

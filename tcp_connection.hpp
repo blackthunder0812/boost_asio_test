@@ -1,7 +1,7 @@
 #ifndef TCP_CONNECTION_HPP
 #define TCP_CONNECTION_HPP
+
 #include <boost/asio.hpp>
-#include <boost/array.hpp>
 #include <memory>
 
 class tcp_server;
@@ -18,8 +18,8 @@ class tcp_connection : public std::enable_shared_from_this<tcp_connection>
     void read_header();
     void read_header_handler (const boost::system::error_code& err);
     void read_payload(unsigned int payload_length);
-    void read_payload_handler(std::shared_ptr<std::vector<unsigned char>> payload_ptr, const boost::system::error_code& err);
-    void process_message(std::shared_ptr<std::vector<unsigned char>> payload_ptr);
+    void read_payload_handler(std::unique_ptr<std::vector<unsigned char>> payload_ptr, const boost::system::error_code& err);
+    void process_message(std::unique_ptr<std::vector<unsigned char>> payload_ptr);
 
   public:
     static std::shared_ptr<tcp_connection> create_connection(boost::asio::io_service &io_service, tcp_server *tcp_server_ptr);

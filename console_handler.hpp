@@ -1,5 +1,6 @@
 #ifndef CONSOLE_HANDLER_HPP
 #define CONSOLE_HANDLER_HPP
+
 #include <boost/asio.hpp>
 
 class tcp_server;

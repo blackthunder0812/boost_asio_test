@@ -1,7 +1,8 @@
 #ifndef TCP_SERVER_HPP
 #define TCP_SERVER_HPP
-#include <unordered_set>
+
 #include <boost/asio.hpp>
+#include <unordered_set>
 
 class tcp_connection;
 class tcp_server

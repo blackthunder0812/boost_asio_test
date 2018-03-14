@@ -1,8 +1,5 @@
 #include <iostream>
 #include <exception>
-#include <thread>
-#include <list>
-#include <string>
 #include <boost/asio.hpp>
 #include "tcp_server.hpp"
 #include "console_handler.hpp"
