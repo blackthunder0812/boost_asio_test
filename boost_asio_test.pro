@@ -21,3 +21,7 @@ HEADERS += \
     demangle.h
 
 DEFINES += BOOST_ASIO_DISABLE_HANDLER_TYPE_REQUIREMENTS BOOST_ASIO_HAS_MOVE
+
+#TODO:
+# - custom handler allocator
+# - use raw array instead of vector
