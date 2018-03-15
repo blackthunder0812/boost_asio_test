@@ -3,6 +3,7 @@
 
 #include <boost/asio.hpp>
 #include <memory>
+#include "handler_memory.hpp"
 
 class tcp_server;
 class tcp_connection : public std::enable_shared_from_this<tcp_connection>
@@ -13,13 +14,17 @@ class tcp_connection : public std::enable_shared_from_this<tcp_connection>
     std::array<unsigned char, HEADER_SIZE> read_header_buffer;
     boost::asio::ip::tcp::socket socket_;
     tcp_server *tcp_server_ptr;
+    handler_memory read_header_handler_memory_;
+    handler_memory read_payload_handler_memory_;
+    handler_memory write_handler_memory_;
+
     tcp_connection(boost::asio::io_service &io_service, tcp_server *tcp_server_ptr);
     void write_handler(const boost::system::error_code& err);
     void read_header();
     void read_header_handler (const boost::system::error_code& err);
     void read_payload(unsigned int payload_length);
-    void read_payload_handler(std::unique_ptr<std::vector<unsigned char>> payload_ptr, const boost::system::error_code& err);
-    void process_message(std::unique_ptr<std::vector<unsigned char>> payload_ptr);
+    void read_payload_handler(std::shared_ptr<std::vector<unsigned char>> payload_ptr, const boost::system::error_code& err);
+    void process_message(std::shared_ptr<std::vector<unsigned char>> payload_ptr);
 
   public:
     static std::shared_ptr<tcp_connection> create_connection(boost::asio::io_service &io_service, tcp_server *tcp_server_ptr);

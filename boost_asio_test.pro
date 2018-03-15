@@ -10,7 +10,8 @@ QMAKE_CXXFLAGS += -std=c++17
 SOURCES += main.cpp \
     tcp_server.cpp \
     tcp_connection.cpp \
-    console_handler.cpp
+    console_handler.cpp \
+    handler_memory.cpp
 
 LIBS += -lboost_system -lpthread
 
@@ -18,10 +19,13 @@ HEADERS += \
     tcp_server.hpp \
     tcp_connection.hpp \
     console_handler.hpp \
-    demangle.h
+    demangle.h \
+    handler_memory.hpp \
+    handler_allocator.hpp \
+    allocator_handler.hpp
 
 DEFINES += BOOST_ASIO_DISABLE_HANDLER_TYPE_REQUIREMENTS BOOST_ASIO_HAS_MOVE
 
 #TODO:
-# - custom handler allocator
+# - fix handler memory leak
 # - use raw array instead of vector

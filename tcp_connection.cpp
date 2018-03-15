@@ -4,6 +4,7 @@
 #include <boost/endian/conversion.hpp>
 #include <vector>
 #include <functional>
+#include "allocator_handler.hpp"
 
 tcp_connection::tcp_connection(boost::asio::io_service &io_service, tcp_server *tcp_server_ptr) :
   socket_(io_service),
@@ -16,9 +17,10 @@ void tcp_connection::write(std::shared_ptr<std::vector<unsigned char>> message)
 {
   boost::asio::async_write(socket_,
                            boost::asio::buffer(*message),
-                           std::bind(&tcp_connection::write_handler,
-                                       shared_from_this(),
-                                       std::placeholders::_1));
+                           make_allocation_handler(write_handler_memory_,
+                                             std::bind(&tcp_connection::write_handler,
+                                                       shared_from_this(),
+                                                       std::placeholders::_1)));
 }
 
 void tcp_connection::close()
@@ -48,9 +50,10 @@ void tcp_connection::read_header()
 {
   boost::asio::async_read(socket_,
                           boost::asio::buffer(read_header_buffer),
-                          std::bind(&tcp_connection::read_header_handler,
-                                      shared_from_this(),
-                                      std::placeholders::_1));
+                          make_allocation_handler(read_header_handler_memory_,
+                                            std::bind(&tcp_connection::read_header_handler,
+                                                      shared_from_this(),
+                                                      std::placeholders::_1)));
 }
 
 void tcp_connection::read_header_handler(const boost::system::error_code &err)
@@ -87,16 +90,17 @@ void tcp_connection::read_header_handler(const boost::system::error_code &err)
 // TODO: Create custom handler allocator
 void tcp_connection::read_payload(unsigned int payload_length)
 {
-  std::unique_ptr<std::vector<unsigned char>> payload_ptr(new std::vector<unsigned char>(payload_length));
+  std::shared_ptr<std::vector<unsigned char>> payload_ptr(new std::vector<unsigned char>(payload_length));
   boost::asio::async_read(socket_,
                           boost::asio::buffer(payload_ptr->data(), payload_length),
-                          std::bind(&tcp_connection::read_payload_handler,
-                                      shared_from_this(),
-                                      std::move(payload_ptr),
-                                      std::placeholders::_1));
+                          make_allocation_handler(read_payload_handler_memory_,
+                                            std::bind(&tcp_connection::read_payload_handler,
+                                                      shared_from_this(),
+                                                      payload_ptr,
+                                                      std::placeholders::_1)));
 }
 
-void tcp_connection::read_payload_handler(std::unique_ptr<std::vector<unsigned char>> payload_ptr, const boost::system::error_code &err)
+void tcp_connection::read_payload_handler(std::shared_ptr<std::vector<unsigned char>> payload_ptr, const boost::system::error_code &err)
 {
   if(err) {
     if (err != boost::asio::error::eof) {
@@ -111,12 +115,12 @@ void tcp_connection::read_payload_handler(std::unique_ptr<std::vector<unsigned c
     tcp_server_ptr->get_connection_list().erase(this);
     socket_.close();
   } else {
-    process_message(std::move(payload_ptr));
+    process_message(payload_ptr);
     read_header();
   }
 }
 
-void tcp_connection::process_message(std::unique_ptr<std::vector<unsigned char>> payload_ptr)
+void tcp_connection::process_message(std::shared_ptr<std::vector<unsigned char> > payload_ptr)
 {
   size_t payload_size = payload_ptr->size();
   for (size_t i = 0; i < payload_size; i++) {
