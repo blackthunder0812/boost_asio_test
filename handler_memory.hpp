@@ -12,6 +12,7 @@ class handler_memory
 
   public:
     handler_memory();
+    ~handler_memory();
     handler_memory(const handler_memory&) = delete;             // non-copyable
     handler_memory& operator=(const handler_memory&) = delete;  // non-copyable
 

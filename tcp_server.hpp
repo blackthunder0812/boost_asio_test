@@ -3,6 +3,7 @@
 
 #include <boost/asio.hpp>
 #include <unordered_set>
+#include "handler_memory.hpp"
 
 class tcp_connection;
 class tcp_server
@@ -12,6 +13,8 @@ class tcp_server
     boost::asio::ip::tcp::acceptor acceptor_;
     void start_accept();
     void accept_handler(std::shared_ptr<tcp_connection> connection_ptr, const boost::system::error_code &err);
+    handler_memory accepter_handler_memory_;
+
   public:
     tcp_server(boost::asio::io_service &io_service);
     std::unordered_set<tcp_connection*>& get_connection_list();

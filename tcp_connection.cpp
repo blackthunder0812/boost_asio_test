@@ -18,9 +18,9 @@ void tcp_connection::write(std::shared_ptr<std::vector<unsigned char>> message)
   boost::asio::async_write(socket_,
                            boost::asio::buffer(*message),
                            make_allocation_handler(write_handler_memory_,
-                                             std::bind(&tcp_connection::write_handler,
-                                                       shared_from_this(),
-                                                       std::placeholders::_1)));
+                                                   std::bind(&tcp_connection::write_handler,
+                                                             shared_from_this(),
+                                                             std::placeholders::_1)));
 }
 
 void tcp_connection::close()
@@ -51,9 +51,9 @@ void tcp_connection::read_header()
   boost::asio::async_read(socket_,
                           boost::asio::buffer(read_header_buffer),
                           make_allocation_handler(read_header_handler_memory_,
-                                            std::bind(&tcp_connection::read_header_handler,
-                                                      shared_from_this(),
-                                                      std::placeholders::_1)));
+                                                  std::bind(&tcp_connection::read_header_handler,
+                                                            shared_from_this(),
+                                                            std::placeholders::_1)));
 }
 
 void tcp_connection::read_header_handler(const boost::system::error_code &err)
@@ -94,10 +94,10 @@ void tcp_connection::read_payload(unsigned int payload_length)
   boost::asio::async_read(socket_,
                           boost::asio::buffer(payload_ptr->data(), payload_length),
                           make_allocation_handler(read_payload_handler_memory_,
-                                            std::bind(&tcp_connection::read_payload_handler,
-                                                      shared_from_this(),
-                                                      payload_ptr,
-                                                      std::placeholders::_1)));
+                                                  std::bind(&tcp_connection::read_payload_handler,
+                                                            shared_from_this(),
+                                                            payload_ptr,
+                                                            std::placeholders::_1)));
 }
 
 void tcp_connection::read_payload_handler(std::shared_ptr<std::vector<unsigned char>> payload_ptr, const boost::system::error_code &err)

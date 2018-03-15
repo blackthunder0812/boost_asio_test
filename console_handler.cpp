@@ -7,16 +7,18 @@
 #include <string>
 #include <functional>
 #include "demangle.h"
+#include "allocator_handler.hpp"
 
 void console_handler::read()
 {
   boost::asio::async_read_until(input_stream_,
                                 read_buffer_,
                                 '\n',
-                                std::bind(&console_handler::read_handler,
-                                            this,
-                                            std::placeholders::_1,
-                                            std::placeholders::_2));
+                                make_allocation_handler(console_read_handler_memory_,
+                                                        std::bind(&console_handler::read_handler,
+                                                                    this,
+                                                                    std::placeholders::_1,
+                                                                    std::placeholders::_2)));
 }
 
 void console_handler::read_handler(const boost::system::error_code &err, size_t byte_read)

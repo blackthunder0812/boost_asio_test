@@ -27,5 +27,4 @@ HEADERS += \
 DEFINES += BOOST_ASIO_DISABLE_HANDLER_TYPE_REQUIREMENTS BOOST_ASIO_HAS_MOVE
 
 #TODO:
-# - fix handler memory leak
 # - use raw array instead of vector
